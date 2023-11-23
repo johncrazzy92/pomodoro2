@@ -4,9 +4,10 @@ import "./App.css";
 
 function App() {
   const [minutosVal, setMinutosVal] = useState(15);
-  const [segundosVal, setSegundosVal] = useState(0);
+  const [segundosVal, setSegundosVal] = useState("00");
   const [edit, setEdit] = useState(true);
   const [countStart, setCountStart] = useState(false);
+  const [end , setEnd] = useState(false)
 
   const refMinutos = useRef(0);
   const refSegundos = useRef(0);
@@ -22,15 +23,19 @@ function App() {
           setSegundosVal(59);
         } else {
           clearInterval(intervalRef.current);
+          setEnd(!end)
           setCountStart(false);
         }
       }, 1000);
     }
 
-    return () => clearInterval(intervalRef.current); // Limpiar el intervalo al desmontar el componente
+    return () => clearInterval(intervalRef.current);
   }, [countStart, segundosVal, minutosVal]);
 
   const handleStart = () => {
+    if(!edit){
+      setEdit(!edit)
+    }
     setCountStart(!countStart);
   };
 
@@ -41,10 +46,7 @@ function App() {
   const handleSegundos = (event) => {
     let nuevoValor = event.target.value;
 
-    // Asegurarse de que el valor sea un número y esté entre 0 y 59
     nuevoValor = Math.min(Math.max(parseInt(nuevoValor) || 0, 0), 59);
-
-    // Formatear el valor para siempre tener dos dígitos
     nuevoValor = nuevoValor < 10 ? `0${nuevoValor}` : nuevoValor.toString();
 
     setSegundosVal(nuevoValor);
@@ -56,6 +58,9 @@ function App() {
       refMinutos.current.valueOf = minutosVal;
       refSegundos.current.valueOf = segundosVal;
     }
+    if (end){
+      setEnd(!end)
+    }
   };
 
   const estiloInput = {
@@ -64,20 +69,21 @@ function App() {
 
   return (
     <>
-      <div className="font-babes h-screen w-screen flex flex-col justify-center items-center bg-black gap-5">
-        <div className="flex h-36 items-center justify-center">
+      <div className="font-babes h-screen w-screen flex flex-col justify-center items-center bg-[#2c2c32] ">
+        <div style={{"background":"radial-gradient(circle, transparent 0%, rgba(0, 0, 0, 1) 100%)"}} className={`flex shadow-2xl shadow-black h-[400px] w-[400px] border-8 border-[${end ?"#f00" : "#2dcb62"}] flex-col p-10 items-center justify-center bg-[#202024] rounded-full`}>
+        <div className="flex  items-center justify-center">
           <input
             style={estiloInput}
-            className="w-48 h-44 flex text-end text-white bg-black"
+            className={`w-36 h-36  flex text-end text-white bg-transparent focus:outline-none ${edit ? "" : "border-b" }`}
             ref={refMinutos}
             type="text"
             onChange={handleMinutes}
             value={minutosVal}
             readOnly={edit}
           />
-          <p className="flex  justify-center text-white font-light" style={estiloInput}>:</p>
+          <p className=" text-white font-light box-border" style={estiloInput}>:</p>
           <input
-            className="w-48 h-44 placeholder-text-white text-white text-start bg-black"
+            className={`w-36 h-36  placeholder-text-white text-white text-start bg-transparent focus:outline-none ${edit ? "" : "border-b" }`}
             style={estiloInput}
             ref={refSegundos}
             type="text"
@@ -91,7 +97,7 @@ function App() {
           onClick={() => handleStart()}
           className="cursor-pointer text-slate-500 font-extrabold tracking-widest text-3xl hover:text-white"
         >
-          START
+          {!countStart ? "START" : "STOP"}
         </p>
         <img
           className="cursor-pointer"
@@ -99,6 +105,7 @@ function App() {
           onClick={handleEdit}
           alt="Edit Icon"
         />
+      </div>
       </div>
     </>
   );
